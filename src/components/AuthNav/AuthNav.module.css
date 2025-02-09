@@ -1,0 +1,19 @@
+.authButton {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 5px;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    background-color: rgb(67, 86, 86);
+    border-radius: 5px;
+    text-decoration: none;
+  }
+  
+  .authButton:hover {
+    background-color: #4f5c56;
+  }
+  
+  .authButton:active {
+    background-color: #3b4742;
+  }

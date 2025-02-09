@@ -7,6 +7,16 @@
     margin: 0 auto 20px;
   }
   
+  .mainTitle {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
   .contactFormLabel {
     display: flex;
     flex-direction: column;
@@ -21,7 +31,7 @@
   }
   
   .contactFormInput {
-    width: 100%;
+    width: 415px;
     height: 35px;
     border-radius: 4px;
     border: 1px solid rgba(46, 47, 66, 0.4);
@@ -30,7 +40,7 @@
     transition: border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
       box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     margin-bottom: 10px;
-    padding: 5px 35px;
+    padding-left: 35px;
   }
   
   .contactFormInput:focus {

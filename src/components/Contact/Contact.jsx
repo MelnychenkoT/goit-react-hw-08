@@ -1,12 +1,21 @@
-import { BsPhone, BsPerson, BsTrash } from 'react-icons/bs';
-import { deleteContact } from '../../redux/contactsOps';
-import { useDispatch } from "react-redux";
-import PropTypes from 'prop-types';
+import { BsPhone, BsPerson } from 'react-icons/bs';
+import { useDispatch, useSelector } from "react-redux";
+import { selectDeletingIds } from '../../redux/contacts/selectors';
+import { deleteContact } from '../../redux/contacts/operations';
+
+
 import s from './Contact.module.css';
 
-const Contact = ({ contact: { id, name, number } }) => {
+const Contact = ({ id, name, number }) => {
   const dispatch = useDispatch();
-  const handleDelete = () => dispatch(deleteContact(id));
+  const deletingIds = useSelector(selectDeletingIds);
+  const isDeleting = deletingIds.includes(id);
+
+  const handleDelete = () => {
+    if (!isDeleting) {
+      dispatch(deleteContact(id));
+    }
+  };
 
   return (
     <div className={s.contactContainer}>
@@ -20,19 +29,15 @@ const Contact = ({ contact: { id, name, number } }) => {
           {number}
         </li>
       </ul>
-      <button className={s.contactDeleteBtn} type="button" onClick={handleDelete}>
-        <BsTrash className={s.deleteBtnIcon} size="15" />
-        Delete
+      <button 
+      className={s.contactDeleteBtn} 
+      onClick={handleDelete}
+      disabled={isDeleting}
+      >
+        {isDeleting ? 'Deleting...' : 'Delete'}{' '}
       </button>
     </div>
   );
 };
-
-Contact.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  number: PropTypes.string,
-};
-
 
 export default Contact;

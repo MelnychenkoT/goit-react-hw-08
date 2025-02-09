@@ -1,30 +1,35 @@
 import { useSelector } from "react-redux";
-import { selectFilteredContacts, selectIsLoading } from '../../redux/selectors';
+import { selectIsLoading, selectError } from '../../redux/contacts/selectors';
+import { selectFilterValue } from '../../redux/filters/selectors';
 import Contact from '../Contact/Contact';
 import s from './ContactList.module.css';
 
 const ContactList = () => {
-  const filteredContacts = useSelector(selectFilteredContacts);
+  const contacts = useSelector(state => state.contacts.items);
+  const filter = useSelector(selectFilterValue);
   const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
   
+  if (isLoading) {
+    return <p>Loading... Please wait a little</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+  const filteredContacts = contacts.filter(contact => {
+    const nameMatch = contact.name.toLowerCase().includes(filter);
+    const phoneMatch = contact.number.includes(filter);
+    return nameMatch || phoneMatch;
+  });
+
   return (
-    <> 
-          {filteredContacts.length === 0 && !isLoading ? (
-        <p className={s.infoText}>No contacts found</p>
-      ) : (
-      <ul className={s.contactList}>
-      {filteredContacts.map(contact => (
-        <li key={contact.id} className={s.contactItem}>
-          <Contact contact={contact}
-          />
-        </li>
+    <ul className={s.contactList}>
+      {filteredContacts.map(({ id, name, number }) => (
+        <Contact key={id} id={id} name={name} number={number} />
       ))}
     </ul>
-      )}
-      {filteredContacts.length === 0 && filteredContacts.length !== 0 && (
-        <p className={s.infoText}>Your phonebook is empty</p>
-      )}
-    </>
   );
 };
 

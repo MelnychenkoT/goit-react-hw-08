@@ -1,91 +1,96 @@
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { nanoid } from "nanoid";
+import { useFormik} from 'formik';
 import * as Yup from 'yup';
-import 'izitoast/dist/css/iziToast.min.css';
+import { useDispatch, useSelector } from 'react-redux';
 import { BsPhone, BsPerson, BsPersonAdd } from 'react-icons/bs';
+import { addContact } from '../../redux/contacts/operations';
+import { selectContacts, selectError } from '../../redux/contacts/selectors';
 import s from './ContactForm.module.css';
-import { useDispatch } from "react-redux";
-import { addContact } from '../../redux/contactsOps';
-
-const initialValues = {
-  id: '',
-  name: '',
-  number: '',
-};
-
-const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(3, 'Too Short!')
-    .max(50, 'Too Long!')
-    .required('Required'),
-  number: Yup.string()
-    .min(3, "Too short!")
-    .max(50, "Too long!")
-    .required('Required'),
-});
 
 const ContactForm = () => {
   const dispatch = useDispatch();
-  const handleSubmit = (values, actions) => {
-    actions.resetForm();
-    dispatch(
-      addContact({
-        id: nanoid(),
-        name: values.name,
-        number: values.number,
-      })
-    );
-  };
+  const contacts = useSelector(selectContacts);
+  const error = useSelector(selectError);
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      number: '',
+    },
+    validationSchema: Yup.object({
+      name: Yup.string()
+        .min(3, 'Name must be at least 3 characters')
+        .max(50, 'Name must be less than 50 characters')
+        .required('Name is required'),
+      number: Yup.string()
+        .matches(/^\d+$/, 'Phone number must contain only digits')
+        .min(7, 'Phone number must be at least 7 digits')
+        .max(15, 'Phone number must be less than 15 digits')
+        .required('Phone number is required'),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      const duplicate = contacts.find(
+        contact => contact.name.toLowerCase() === values.name.toLowerCase()
+      );
+
+      if (duplicate) {
+        alert(`${values.name} is already in contacts!`);
+        return;
+      }
+
+      dispatch(addContact(values));
+      resetForm();
+    },
+  });
 
   return (
-    <Formik
-      onSubmit={handleSubmit}
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-    >
-      <Form autoComplete="off" className={s.contactFormWrap}>
+      <form autoComplete="off" onSubmit={formik.handleSubmit} className={s.contactFormWrap}>
+        <h1 className={s.mainTitle}>Phonebook</h1>
         <label className={s.contactFormLabel} htmlFor="name">
           Name
         </label>
         <div className={s.contactFormInputWrap}>
-          <Field
+          <input
             className={s.contactFormInput}
             type="text"
             name="name"
             id="name"
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            autoComplete="name"
           />
+          {formik.touched.name && formik.errors.name ? (
+        <div className={s.contactFormError}>{formik.errors.name}</div>
+      ) : null}
           <BsPerson className={s.contactFormIcon} size="20" />
         </div>
-        <ErrorMessage
-          name="name"
-          component="span"
-          className={s.contactFormError}
-        />
-
+        
         <label className={s.contactFormLabel} htmlFor="number">
           Number
         </label>
         <div className={s.contactFormInputWrap}>
-          <Field
+          <input
             className={s.contactFormInput}
             type="text"
             name="number"
             id="number"
+            value={formik.values.number}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            autoComplete="tel"
           />
+          {formik.touched.number && formik.errors.number ? (
+        <div className={s.contactFormError}>{formik.errors.number}</div>
+      ) : null}
+      {error && <div className={s.contactFormError}>Error: {error}</div>}{' '}
           <BsPhone className={s.contactFormIcon} size="20" />
         </div>
-        <ErrorMessage
-          name="number"
-          component="span"
-          className={s.contactFormError}
-        />
-
+        
         <button className={s.contactFormBtn} type="submit">
           <BsPersonAdd className={s.contactFormBtnIcon} size="15" />
           Add contact
         </button>
-      </Form>
-    </Formik>
+      </form>
   );
 };
 
